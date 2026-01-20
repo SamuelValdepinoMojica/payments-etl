@@ -1,9 +1,9 @@
-# Monitoreo y Alertas
+# Estrategia de Monitoreo
 
-Se define la siguiente regla crítica en Prometheus para la disponibilidad de la DB:
+Se ha diseñado la siguiente regla de alerta crítica para la integración con Prometheus/AlertManager:
 
 ## Alerta: PostgresDown
-* **Condición:** `pg_up == 0` (La métrica de conexión cae a 0).
-* **Duración:** `for: 1m` (Si persiste más de 1 minuto).
+* **Condición:** `pg_up == 0`
+* **Duración:** `for: 1m`
 * **Severidad:** Crítica.
-* **Acción:** Revisar logs del contenedor `db` y reiniciar el servicio.
+* **Protocolo:** Requiere reinicio manual del servicio `db` tras inspección de logs.

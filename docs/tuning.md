@@ -1,8 +1,8 @@
-# Tuning de PostgreSQL
+# Diseño de Configuración PostgreSQL
 
-Se ajustaron los siguientes parámetros en `postgresql.conf` para una instancia dedicada a escritura intensiva:
+Para este entorno de escritura intensiva, se define la siguiente configuración óptima en `postgresql.conf`:
 
-* **shared_buffers:** Ajustado para aprovechar la memoria del contenedor sin causar OOM.
-* **effective_cache_size:** Configurado para estimar la disponibilidad de caché del sistema operativo.
-* **work_mem:** Incrementado para permitir ordenamientos en memoria antes de escribir en disco temporal.
-* **wal_compression:** Activado (`on`) para reducir la I/O en disco durante cargas masivas.
+* **shared_buffers:** 256MB. Dimensionado para aprovechar la memoria del contenedor.
+* **work_mem:** 16MB. Para permitir ordenamientos en memoria RAM.
+* **wal_compression:** on. Crítico para reducir I/O en disco durante cargas masivas.
+* **max_wal_size:** 1GB. Para espaciar los checkpoints.
