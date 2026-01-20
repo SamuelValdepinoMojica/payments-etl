@@ -1,0 +1,89 @@
+
+services:
+  db:
+      image: postgres:15-alpine
+      container_name: postgres_db
+      environment:
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: ${DB_NAME}
+      volumes:
+        - db_data:/var/lib/postgresql/data
+        - ../db/postgresql.conf:/etc/postgresql/postgresql.conf
+        - ../scripts:/scripts
+      networks:
+        - etl_network
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+  postgres-exporter:
+      image: prometheuscommunity/postgres-exporter
+      environment:
+        DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable"
+      ports:
+        - "9187:9187"
+      networks:
+        - etl_network
+      depends_on:
+        db:
+          condition: service_healthy 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    networks:
+      - etl_network
+  
+  worker:
+    build: ../etl
+    env_file: ../.env
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      - etl_network
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus_service
+    volumes:
+      - prometheus_data:/prometheus
+      - ../prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports: 
+      - "9090:9090"
+    networks:
+      - etl_network
+  grafana:
+    image: grafana/grafana
+    container_name: grafana_service
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - etl_network
+
+  
+volumes:
+  db_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  etl_network:
+    driver: bridge
+
+    
