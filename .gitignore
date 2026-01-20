@@ -1,0 +1,22 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+.venv/
+
+# --- Variables de Entorno (SEGURIDAD CRÍTICA) ---
+.env
+
+# --- Datos Locales de Docker (Volúmenes) ---
+# Ignoramos estas carpetas para no subir la base de datos a GitHub
+pgdata/
+rabbitmq_data/
+
+# --- IDEs y Sistema Operativo ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
